@@ -2,16 +2,14 @@ import chess
 import random
 import math
 import time
-import concurrent.futures
-import ctypes
-from multiprocessing import Lock, Value, Process, Array
+from multiprocessing import Lock, Value, Process
 
 
 start_time = time.time()
 
 inf = math.inf
 
-maxDepth = 3
+maxDepth = 5
 
 pawntable = [
  0,  0,  0,  0,  0,  0,  0,  0,
@@ -169,8 +167,8 @@ def minimax(board, depth, maxPlayer, maxColor, alpha, beta, firstMove, lock, toS
                     # bestMove = firstMove
             
             # print('MAX: ',score, alpha)
-            return alpha.value
-            # return
+            # return alpha.value
+            return score
         else:
             for move in board.legal_moves: 
                 board.push(move)
@@ -181,8 +179,9 @@ def minimax(board, depth, maxPlayer, maxColor, alpha, beta, firstMove, lock, toS
                 # print('MAX: ',depth, move, score)
                 
                 with lock:
-                    # if score >= beta.value: #corte
-                    #     return beta.value
+                    if score >= beta.value: #corte
+                        # return beta.value
+                        return score
                     
                     if score > alpha.value:
                         alpha.value = score
@@ -190,31 +189,30 @@ def minimax(board, depth, maxPlayer, maxColor, alpha, beta, firstMove, lock, toS
                         toSquare.value = move.to_square
                         # bestMove = move
             
-            return alpha.value
-            # return 
+            # return alpha.value
+            return score
     
     else:
         for move in board.legal_moves:
             board.push(move)
             
-            score = minimax(board, depth-1, True, maxColor, alpha.value, beta, None, lock, toSquare, fromSquare)
+            score = minimax(board, depth-1, True, maxColor, alpha, beta, None, lock, toSquare, fromSquare)
 
             board.pop()
             
             # print('MIN:')
             # print('MIN: ', depth,move, score.value)
             with lock:
-                # if score <= alpha.value: #corte
-                #     return alpha.value
+                if score <= alpha.value: #corte
+                    return alpha.value
 
                 if score < beta.value:
                     beta.value = score
                     # fromSquare.value = move.from_square
                     # toSquare.value = move.to_square
-                    # bestMove = move
 
         return score
-        # return
+        # return beta.value
 
 def randomMove(board):
     return random.choice(list(board.legal_moves))
@@ -244,8 +242,8 @@ def parallel(board, maxPlayer, maxColor):
     bestMove = chess.Move.from_uci(move)
     return bestMove
 
-def porradaDeBot(board, depth):
-    print(board, "\n")
+def porradaDeBot(board):
+    # print(board, "\n")
 
     while board.outcome() == None:
         'brancas'
@@ -269,25 +267,31 @@ def porradaDeBot(board, depth):
         board.push(move)
         # print("\n BLACK", move, "\n",board)
         
-    print(board.outcome())
-    print(board)
+    # print(board.outcome())
+    # print(board)
+    return board.outcome()
 
 if __name__ == "__main__":  
     board = chess.Board()
-    
-    # move = parallel(board, True, chess.WHITE)
-    # print(move)
-    # board.push(move)
-    # board.push(chess.Move.from_uci("d7d5"))
-    # move = parallel(board, True, chess.WHITE)
-    # print(move)
-    # board.push(move)
-    # board.push(chess.Move.from_uci("e7e6"))
-    # move = parallel(board, True, chess.WHITE)
-    # print(move)
-    # board.push(move)
-    # num = 120
 
-    porradaDeBot(board, maxDepth)
+    global_start_time = time.time()
+    num = 120
+    winWhite = 0
+    winBlack = 0
+    RunTime = 0
+    mediaTime = 0
 
-    print("--- %s seconds ---" % (time.time() - start_time))
+    for i in range(num):
+        start_time = time.time()
+        result = porradaDeBot(board)
+        RunTime += time.time() - start_time
+
+        if result.winner:
+            winWhite += 1
+        else:
+            winBlack += 1
+    mediaTime = RunTime / num
+    print("--- Tempo medio: %s seconds | Vitorias Brancas: %s | Vitorias pretas: %s---" %(mediaTime, winWhite, winBlack))
+    # result = porradaDeBot(board, maxDepth)
+    # print(result)
+    print("--- Tempo total: %s seconds ---" % (time.time() - global_start_time))

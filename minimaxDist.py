@@ -2,7 +2,6 @@ import chess
 import random
 import math
 import time
-import threading as thread
 import concurrent.futures
 
 
@@ -10,7 +9,7 @@ start_time = time.time()
 
 inf = math.inf
 
-maxDepth = 3
+maxDepth = 5
 
 pawntable = [
  0,  0,  0,  0,  0,  0,  0,  0,
@@ -215,15 +214,15 @@ def parallel(board,maxPlayer, maxColor, alpha, beta):
                 maior = task.result()[0]
                 bestMove = task.result()[1]
 
-    return maior,bestMove
+    return bestMove
 
-def porradaDeBot(board, depth):
-    print(board)
+def porradaDeBot(board):
+    # print(board)
 
     while board.outcome() == None:
         'brancas'
         # move = minimax(board, depth, True, chess.WHITE, -inf, inf)[1]
-        move = parallel(board, True, chess.WHITE, -inf, inf)[1]
+        move = parallel(board, True, chess.WHITE, -inf, inf)
         # print(move)
         if board.outcome() != None:
             # print(board.outcome())
@@ -243,13 +242,31 @@ def porradaDeBot(board, depth):
         board.push(move)
         # print("\n BLACK", move, "\n",board)
         
-    print(board.outcome())
-    print(board)
+    # print(board.outcome())
+    # print(board)
+    return board.outcome()
+
 
 if __name__ == "__main__":  
     board = chess.Board()
 
-    # porradaDeBot(board, maxDepth)
-    a = parallel(board, True, chess.WHITE, -inf, inf)[1]
-    print(a)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    
+    num = 120
+    winWhite = 0
+    winBlack = 0
+    RunTime = 0
+    mediaTime = 0
+    global_start_time = time.time()
+
+    for i in range(num):
+        start_time = time.time()
+        result = porradaDeBot(board)
+        RunTime += time.time() - start_time
+
+        if result.winner:
+            winWhite += 1
+        else:
+            winBlack += 1
+    mediaTime = RunTime / num
+    print("--- Tempo medio: %s seconds | Vitorias Brancas: %s | Vitorias pretas: %s---" %(mediaTime, winWhite, winBlack))
+    print("--- Tempo total: %s seconds ---" % (time.time() - global_start_time))

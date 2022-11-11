@@ -6,8 +6,6 @@ import math
 import time
 
 
-start_time = time.time()
-
 inf = math.inf
 
 pawntable = [
@@ -187,7 +185,7 @@ def porradaDeBot(board, depth):
     whiteScore = 0
     blackScore = 0
 
-    print(board)
+    # print(board)
 
     while board.outcome() == None:
         'brancas'
@@ -207,24 +205,29 @@ def porradaDeBot(board, depth):
         move = randomMove(board)
         board.push(move)
         # print("\n BLACK", move, "\n",board)
-    print(board, "\n")
-    print(board.outcome())        
+    # print(board, "\n")
+    # print(board.outcome())
+    return board.outcome()       
 
 if __name__ == "__main__":  
     board = chess.Board()
 
-    # move = minimax(board, 3, True, chess.WHITE, -inf, inf)[1]
-    # print(move)
-    # board.push(move)
-    # board.push(chess.Move.from_uci("d7d5"))
-    # move = minimax(board, 3, True, chess.WHITE, -inf, inf)[1]
-    # print(move)
-    # board.push(move)
-    # board.push(chess.Move.from_uci("e7e6"))
-    # move = minimax(board, 3, True, chess.WHITE, -inf, inf)[1]
-    # print(move)
-    # board.push(move)
+    num = 120
+    winWhite = 0
+    winBlack = 0
+    RunTime = 0
+    mediaTime = 0
+    global_start_time = time.time()
 
+    for i in range(num):
+        start_time = time.time()
+        result = porradaDeBot(board, 5)
+        RunTime += time.time() - start_time
 
-    porradaDeBot(board, 5)
-    print("--- %s seconds ---" % (time.time() - start_time))
+        if result.winner:
+            winWhite += 1
+        else:
+            winBlack += 1
+    mediaTime = RunTime / num
+    print("--- Tempo medio: %s seconds | Vitorias Brancas: %s | Vitorias pretas: %s---" %(mediaTime, winWhite, winBlack))
+    print("--- Tempo total: %s seconds ---" % (time.time() - global_start_time))
